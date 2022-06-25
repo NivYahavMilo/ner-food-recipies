@@ -1,1 +1,5 @@
 matplotlib
+pandas~=1.4.2
+numpy
+
+spacy~=3.3.1
