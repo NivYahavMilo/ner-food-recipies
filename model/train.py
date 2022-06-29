@@ -1,64 +1,91 @@
-import numpy as np
-from plot_keras_history import plot_history
+import torch
+import torch.nn as nn
+from torch.nn.utils.rnn import pad_sequence
 from sklearn.model_selection import train_test_split
-
 from model.hyper_parameters import HyperParameters
-from model.models import lstm_crf
+from model.models_ import LSTM
 from model.preprocess import Preprocess
+import numpy as np
+
+K_SEED = 220
 
 
-def prepare_dataset(data: Preprocess, args):
+def _prepare_dataset(data: Preprocess, device: torch.device):
     sentences = data.sentences
-    X = [[word[0] for word in sentence] for sentence in sentences]
-    y = [[word[1] for word in sentence] for sentence in sentences]
+    X = []
+    y = []
+    for sentence in sentences:
+        sequence = torch.FloatTensor([data.word2index[word] for word, _ in sentence])
+        label_seq = torch.LongTensor([data.tag2index[tag] for _, tag in sentence])
 
+        X.append(sequence)
+        y.append(label_seq)
+
+    X_len = torch.LongTensor([len(seq) for seq in X])
+    X = pad_sequence(X, batch_first=True, padding_value=0)
+    y = pad_sequence(y, batch_first=True, padding_value=-1)
+
+    return (
+        X.to(device),
+        X_len.to(device),
+        y.to(device))
+
+
+def _set_device():
+    global K_SEED
+    torch.manual_seed(K_SEED)
+    use_cuda = torch.cuda.is_available()
+    device = torch.device('cuda:0' if use_cuda else 'cpu')
+    return device
+
+
+def _set_training_params(data: Preprocess, args: HyperParameters):
     args.MAX_SENTENCE = data.max_sentence
     args.WORD_COUNT = len(data.index2word)
     args.TAG_COUNT = len(data.tag2index)
-
-    X = [[data.word2index[word] for word in sentence] for sentence in X]
-    y = [[data.tag2index[tag] for tag in sentence] for sentence in y]
-
-    X = [sentence + [data.word2index["--PADDING--"]] * (
-                args.MAX_SENTENCE - len(sentence))
-         for sentence in X]
-    y = [sentence + [data.tag2index["--PADDING--"]] * (
-                args.MAX_SENTENCE - len(sentence))
-         for sentence in y]
-    print("X[0]:", X[0])
-    print("y[0]:", y[0])
-
-    y = [np.eye(args.TAG_COUNT)[sentence] for sentence in y]
-    print("X[0]:", X[0])
-    print("y[0]:", y[0])
-
-    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2,
-                                                        random_state=42)
-
-    print(
-        "Number of sentences in the training dataset: {}".format(len(X_train)))
-    print("Number of sentences in the test dataset : {}".format(len(X_test)))
-
-    X_train = np.asarray(X_train).astype(float)
-    X_test = np.asarray(X_test).astype(float)
-    y_train = np.asarray(y_train).astype(float)
-    y_test = np.asarray(y_test).astype(float)
-
-    return X_train, X_test, y_train, y_test
 
 
 def _train():
     args = HyperParameters()
     raw_data = Preprocess.flow()
-    X_train, X_test, y_train, y_test = prepare_dataset(raw_data, args)
-    ner_model = lstm_crf(args)
-    history = ner_model.fit(X_train, y_train,
-                        batch_size=args.BATCH_SIZE,
-                        epochs=args.MAX_EPOCHS,
-                        validation_split=0.1,
-                        verbose=2)
+    device = _set_device()
+    X, X_len, y = _prepare_dataset(raw_data, device)
 
-    plot_history(history.history)
+    model = LSTM(
+        k_input=args.MAX_SENTENCE,
+        k_embeddings=args.EMBEDDING_DIM,
+        k_layers=1,
+        k_hidden=args.LSTM_UNITS,
+        k_class=args.TAG_COUNT,
+        bi_directional=False,
+        return_states=False
+    )
+
+    model.to(device)
+    print(model)
+
+    loss_func = nn.CrossEntropyLoss(ignore_index=-1)
+    optimizer = torch.optim.Adam(model.parameters())
+
+    max_length = torch.max(X_len)
+    permutation = torch.randperm(X.size()[0])
+    losses = np.zeros(args.EPOCHS)
+
+    for epoch in range(args.EPOCHS):
+        for i in range(0, X.size()[0], args.BATCH_SIZE):
+            indices = permutation[i:i + args.BATCH_SIZE]
+            batch_x, batch_y = X[indices], y[indices]
+            batch_x_len = X_len[indices]
+
+            y_pred = model(batch_x, batch_x_len, max_length)
+            loss = loss_func(y_pred.view(-1, 3), batch_y.view(-1))
+
+            optimizer.zero_grad()
+            loss.backward()
+            optimizer.step()
+        losses[epoch] = loss
+    print(losses)
+    torch.save(model.state_dict(), 'signature_classifier.pt')
 
 
 if __name__ == '__main__':
