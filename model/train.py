@@ -3,11 +3,9 @@ import torch.nn as nn
 from torch.nn.utils.rnn import pad_sequence
 from sklearn.model_selection import train_test_split
 from model.hyper_parameters import HyperParameters
-from model.models_ import LSTM
+from model.models import LSTM
 from model.preprocess import Preprocess
 import numpy as np
-
-K_SEED = 220
 
 
 def _prepare_dataset(data: Preprocess, device: torch.device):
@@ -15,7 +13,7 @@ def _prepare_dataset(data: Preprocess, device: torch.device):
     X = []
     y = []
     for sentence in sentences:
-        sequence = torch.FloatTensor([data.word2index[word] for word, _ in sentence])
+        sequence = torch.LongTensor([data.word2index[word] for word, _ in sentence])
         label_seq = torch.LongTensor([data.tag2index[tag] for _, tag in sentence])
 
         X.append(sequence)
@@ -31,14 +29,6 @@ def _prepare_dataset(data: Preprocess, device: torch.device):
         y.to(device))
 
 
-def _set_device():
-    global K_SEED
-    torch.manual_seed(K_SEED)
-    use_cuda = torch.cuda.is_available()
-    device = torch.device('cuda:0' if use_cuda else 'cpu')
-    return device
-
-
 def _set_training_params(data: Preprocess, args: HyperParameters):
     args.MAX_SENTENCE = data.max_sentence
     args.WORD_COUNT = len(data.index2word)
@@ -48,11 +38,18 @@ def _set_training_params(data: Preprocess, args: HyperParameters):
 def _train():
     args = HyperParameters()
     raw_data = Preprocess.flow()
+    _set_training_params(raw_data, args)
     device = _set_device()
     X, X_len, y = _prepare_dataset(raw_data, device)
 
+    (X_train, X_test,
+     X_len_train, X_len_test,
+     y_train, y_test) = train_test_split(X, X_len, y,
+                                         test_size=0.2,
+                                         random_state=42)
+
     model = LSTM(
-        k_input=args.MAX_SENTENCE,
+        k_input=args.WORD_COUNT,
         k_embeddings=args.EMBEDDING_DIM,
         k_layers=1,
         k_hidden=args.LSTM_UNITS,
@@ -67,26 +64,28 @@ def _train():
     loss_func = nn.CrossEntropyLoss(ignore_index=-1)
     optimizer = torch.optim.Adam(model.parameters())
 
-    max_length = torch.max(X_len)
-    permutation = torch.randperm(X.size()[0])
+    max_length = torch.max(X_len_train)
+    permutation = torch.randperm(X_train.size()[0])
     losses = np.zeros(args.EPOCHS)
 
     for epoch in range(args.EPOCHS):
-        for i in range(0, X.size()[0], args.BATCH_SIZE):
+        for i in range(0, X_train.size()[0], args.BATCH_SIZE):
             indices = permutation[i:i + args.BATCH_SIZE]
-            batch_x, batch_y = X[indices], y[indices]
-            batch_x_len = X_len[indices]
+
+            batch_x, batch_y = X_train[indices], y_train[indices]
+            batch_x_len = X_len_train[indices]
 
             y_pred = model(batch_x, batch_x_len, max_length)
-            loss = loss_func(y_pred.view(-1, 3), batch_y.view(-1))
+            loss = loss_func(y_pred.view(-1, args.TAG_COUNT), batch_y.view(-1))
 
             optimizer.zero_grad()
             loss.backward()
             optimizer.step()
+
         losses[epoch] = loss
     print(losses)
-    torch.save(model.state_dict(), 'signature_classifier.pt')
-
+    torch.save(model.state_dict(), 'ner_lstm.pt')
 
 if __name__ == '__main__':
     _train()
+

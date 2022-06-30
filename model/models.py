@@ -1,88 +1,49 @@
-from keras import layers, Sequential
-from keras import optimizers
-from keras.models import Model
-
-from model.hyper_parameters import HyperParameters
+import torch.nn as nn
+from torch.nn.utils.rnn import pack_padded_sequence, pad_packed_sequence
 
 
-# def lstm_crf(args: HyperParameters):
-#     input_layer = layers.Input(shape=(args.MAX_SENTENCE,))
-#
-#     model = layers.Embedding(args.WORD_COUNT, args.EMBEDDING_DIM,
-#                              embeddings_initializer="uniform",
-#                              input_length=args.MAX_SENTENCE)(input_layer)
-#
-#     model = layers.Bidirectional(
-#         layers.LSTM(args.LSTM_UNITS, recurrent_dropout=args.LSTM_DROPOUT,
-#                     return_sequences=True))(model)
-#
-#     model = layers.TimeDistributed(
-#         layers.Dense(args.N_NEURONS, activation="relu"))(model)
-#
-#     crf_layer = CRF(units=args.TAG_COUNT)
-#     output_layer = crf_layer(model)
-#
-#     ner_model = Model(input_layer, output_layer)
-#
-#     loss = losses.crf_loss
-#     acc_metric = metrics.crf_accuracy
-#     opt = optimizers.Adam(learning_rate=0.001)
-#
-#     ner_model.compile(optimizer=opt, loss=loss, metrics=[acc_metric])
-#
-#     ner_model.summary()
-#
-#     return ner_model
+class LSTM(nn.Module):
 
+    def __init__(self, k_input, k_hidden, k_layers,
+                 k_class, k_embeddings,
+                 bi_directional=False,
+                 return_states=False):
+        super(LSTM, self).__init__()
 
+        self.embedding = nn.Embedding(
+            num_embeddings=k_input,
+            embedding_dim=k_embeddings,
+            padding_idx=0)
 
+        self.lstm = nn.LSTM(
+            k_embeddings,
+            k_hidden,
+            k_layers,
+            bidirectional=bi_directional,
+            batch_first=True)
 
+        self.fc = nn.Linear(k_hidden, k_class)
 
+        self.return_states = return_states
 
-def LSTM(args):
-    model = Sequential()
-    model.add(layers.Embedding(
-        input_dim=args.WORD_COUNT,
-        output_dim=args.EMBEDDING_DIM,
-        input_length=args.MAX_SENTENCE))
+    def forward(self, x, x_len, max_length=None):
+        x = self.embedding(x)
+        x = pack_padded_sequence(
+            input=x,
+            lengths=x_len,
+            batch_first=True,
+            enforce_sorted=False)
 
-    model.add(layers.LSTM(
-        units=args.EMBEDDING_DIM,
-        input_dim=args.LSTM_UNITS,
-        recurrent_dropout=args.LSTM_DROPOUT))
+        x, _ = self.lstm(x)
 
-    model.add(layers.TimeDistributed(
-        layer=layers.Dense(
-        units=args.N_NEURONS,
-        activation='relu')))
+        x, _ = pad_packed_sequence(
+            x,
+            batch_first=True,
+            total_length=max_length)
 
+        y = self.fc(x)
 
-    model.compile(
-        optimizer='adam',
-        loss='sparse_categorical_crossentropy',
-        metrics=['accuracy']
-    )
-
-    return model
-
-
-def BiLSTM(args: HyperParameters):
-    input_word = layers.Input(shape=(args.MAX_SENTENCE,))
-    model = layers.Embedding(
-        input_dim=args.WORD_COUNT,
-        output_dim=args.EMBEDDING_DIM,
-        input_length=args.MAX_SENTENCE)(input_word)
-
-    model = layers.SpatialDropout1D(
-        rate=args.LSTM_DROPOUT)(model)
-
-    model = layers.Bidirectional(layers.LSTM(
-            units=args.LSTM_UNITS,
-            recurrent_dropout=args.LSTM_DROPOUT))(model)
-
-    out = layers.TimeDistributed(layers.Dense(
-        units=args.N_NEURONS,
-        activation="softmax"))(model)
-    model = Model(input_word, out)
-    model.summary()
-
+        if self.return_states:
+            return x, y
+        else:
+            return y
