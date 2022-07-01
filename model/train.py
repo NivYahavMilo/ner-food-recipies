@@ -5,6 +5,7 @@ from sklearn.model_selection import train_test_split
 from model.hyper_parameters import HyperParameters
 from model.models import LSTM
 from model.preprocess import Preprocess
+from model.utils import _set_device
 import numpy as np
 
 
