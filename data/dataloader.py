@@ -1,65 +1,11 @@
+"""
+This script converts 'TASTEset' dataset original tagging structure into a
+IOB tagging. saves it to csv in 'data' directory
+"""
+
 import json
-import os
-import re
-
 import pandas as pd
-
-import config
-
-pd.options.mode.chained_assignment = None  # default='warn'
-import warnings
-
-warnings.simplefilter(action='ignore', category=FutureWarning)
-ENTITIES = ["FOOD", "QUANTITY", "UNIT", "PROCESS", "PHYSICAL_QUALITY", "COLOR",
-            "TASTE", "PURPOSE", "PART"]
-
-
-def _read_csv(dataset, i_col=None):
-    data = pd.read_csv(
-        os.path.join(config.DATA_PATH, f'{dataset}.csv'),
-        index_col=i_col)
-    return data
-
-
-def preprocess_data():
-    data = _read_csv("TASTEset")
-    all_recipes = data["ingredients"].to_list()
-    post_df = pd.DataFrame()
-
-    for ii in data.index:
-        ingredients_entities = json.loads(data.at[ii, "ingredients_entities"])
-        recipes_tokens = re.split(r'\s+', data.at[ii, "ingredients"])
-        jj = 0
-        for token_dict in recipes_tokens:
-            entity_dict = ingredients_entities[jj]
-            if entity_dict['entity'] == recipes_tokens[jj]:
-                post_df = post_df.append(pd.DataFrame(
-                    {
-                        'tag': entity_dict['type'],
-                        'word': entity_dict['entity'],
-                        'sample': ii
-                    }, index=[jj]))
-                jj += 1
-            elif entity_dict['start'] - entity_dict['end'] == \
-                    ingredients_entities[jj]['start'] - \
-                    ingredients_entities[jj]['end']:
-                post_df = post_df.append(pd.DataFrame({
-                    'tag': ingredients_entities[jj]['type'],
-                    'word': ingredients_entities[jj]['entity'],
-                    'sample': ii
-                }, index=[jj]))
-
-                jj += len(ingredients_entities[jj]['entity'].split())
-
-            else:
-                post_df = post_df.append(pd.DataFrame({
-                    'tag': 'O',
-                    'word': recipes_tokens[jj]
-                }))
-                jj += len(recipes_tokens[jj].split()) - 1
-
-        pass
-
+from data_utils import _read_csv
 
 def _data_preprocessing():
     data = _read_csv("TASTEset")
@@ -68,7 +14,6 @@ def _data_preprocessing():
     iob_df = pd.DataFrame()
     jj = 0
     for ii, row in data.iterrows():
-        recipe = row['ingredients']
         entities = json.loads(row['ingredients_entities'])
         post_df = post_df.append(pd.DataFrame(entities))
         post_df['sample'][jj:jj + len(entities)] = ii + 1
