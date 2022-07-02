@@ -5,7 +5,8 @@ IOB tagging. saves it to csv in 'data' directory
 
 import json
 import pandas as pd
-from data_utils import _read_csv
+from data_utils import _read_csv, _split_data_to_train_test
+
 
 def _data_preprocessing():
     data = _read_csv("TASTEset")

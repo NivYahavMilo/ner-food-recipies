@@ -4,10 +4,11 @@ import argparse
 
 def run():
 
-    args = argparse.ArgumentParser()
-    args.add_argument("--mode", "-m", default="inference", required=True)
-    args.add_argument("--module", "-b", default="bert", required=True)
-    args.add_argument("--input", "-i", default="path", required=True)
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--mode", "-m", default="inference", required=True)
+    parser.add_argument("--module", "-b", default="bert", required=True)
+    parser.add_argument("--input", "-i", default="path", required=True)
+    args = vars(parser.parse_args())
 
 
 

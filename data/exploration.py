@@ -1,8 +1,6 @@
 import re
 import config
 from dataloader import _read_csv
-import matplotlib.pyplot as plt
-from operator import itemgetter
 
 
 def data_stats(data_df):

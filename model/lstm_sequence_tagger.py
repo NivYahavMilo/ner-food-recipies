@@ -2,13 +2,13 @@ import torch.nn as nn
 from torch.nn.utils.rnn import pack_padded_sequence, pad_packed_sequence
 
 
-class LSTM(nn.Module):
+class LstmSequenceTagger(nn.Module):
 
     def __init__(self, k_input, k_hidden, k_layers,
                  k_class, k_embeddings,
                  bi_directional=False,
                  return_states=False):
-        super(LSTM, self).__init__()
+        super(LstmSequenceTagger, self).__init__()
 
         self.embedding = nn.Embedding(
             num_embeddings=k_input,
