@@ -3,15 +3,20 @@ import pickle
 import numpy as np
 import torch
 import torch.nn as nn
-import matplotlib.pyplot as plt
-from sklearn.metrics import classification_report, confusion_matrix, \
-    ConfusionMatrixDisplay
-from sklearn.model_selection import train_test_split
 
-from .hyper_parameters import HyperParameters
+
+from hyper_parameters import HyperParameters
 from model.lstm_sequence_tagger import LstmSequenceTagger
-from .preprocess import Preprocess
-from .utils import _set_device, _prepare_dataset, _get_mask, _plot_loss
+from preprocess import Preprocess
+from utils import _set_device, _prepare_dataset, _get_mask, _plot_loss
+
+from matplotlib import pyplot as plt
+
+from sklearn.metrics import (classification_report,
+                             confusion_matrix,
+                             ConfusionMatrixDisplay)
+
+from sklearn.model_selection import train_test_split
 
 
 def _set_training_params(data: Preprocess, args: HyperParameters):
@@ -103,13 +108,13 @@ def _train():
     print(losses['val_loss'])
 
     # Saving loss of train and validation set
-    with open('loss.pkl', 'wb') as handle:
-        pickle.dump(losses, handle, protocol=pickle.HIGHEST_PROTOCOL)
+    # with open('loss.pkl', 'wb') as handle:
+    #     pickle.dump(losses, handle, protocol=pickle.HIGHEST_PROTOCOL)
 
     _plot_loss(losses)
 
     # Saving weights and biases
-    torch.save(model.state_dict(), r'model\\ner_lstm.pt')
+    torch.save(model.state_dict(), r'model\\ner_Bilstm.pt')
     print("model saved to pt")
 
     _evaluate(model=model,
@@ -144,16 +149,6 @@ def _evaluate(model, X_test, X_len_test, y_true, labels):
     plt.title("Confusion Matrix")
     plt.show()
 
-
-
-def test____():
-    import pandas as pd
-    import torch
-    import numpy as np
-    from transformers import BertTokenizerFast, BertForTokenClassification
-    from torch.utils.data import DataLoader
-    from tqdm import tqdm
-    from torch.optim import SGD
 
 if __name__ == '__main__':
     _train()

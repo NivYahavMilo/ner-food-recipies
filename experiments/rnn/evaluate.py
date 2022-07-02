@@ -4,7 +4,7 @@ from colorama import Fore
 import pandas as pd
 from tabulate import tabulate
 
-from model.utils import _plot_loss
+from utils import _plot_loss
 
 labels = {'1': 'I-COLOR',
           '2': 'B-UNIT',

@@ -29,7 +29,7 @@ def _train():
                                            )
 
     # initialize bare-bones sequence tagger
-    tagger = SequenceTagger(hidden_size=256,
+    tagger = SequenceTagger(hidden_size=64,
                             embeddings=embeddings,
                             tag_dictionary=label_dict,
                             tag_type='ner',
@@ -41,7 +41,7 @@ def _train():
     trainer = ModelTrainer(tagger, corpus)
 
     # run fine-tuning
-    trainer.fine_tune('resources/taggers/sota-ner-flert',
+    trainer.fine_tune('experiments/bert-ner-recipes',
                       learning_rate=5.0e-6,
                       mini_batch_size=4,
                       mini_batch_chunk_size=1)
