@@ -46,9 +46,7 @@ def _train():
                       mini_batch_size=4,
                       mini_batch_chunk_size=1)
     # visualize
-    plotter = Plotter()
-    plotter.plot_training_curves('loss.tsv')
+    # plotter = Plotter()
+    # plotter.plot_training_curves('loss.tsv')
 
 
-if __name__ == '__main__':
-    _train()

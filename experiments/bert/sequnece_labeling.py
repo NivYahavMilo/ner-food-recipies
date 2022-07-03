@@ -1,5 +1,5 @@
 """
-Saving original data set to flair format
+Saving original data set to flair format (IOB tagging)
 """
 
 import pandas as pd

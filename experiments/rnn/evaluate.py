@@ -4,7 +4,9 @@ from colorama import Fore
 import pandas as pd
 from tabulate import tabulate
 
-from utils import _plot_loss
+import config
+from experiments.rnn.utils import _plot_loss
+import matplotlib.pyplot as plt
 
 labels = {'1': 'I-COLOR',
           '2': 'B-UNIT',
@@ -27,7 +29,7 @@ labels = {'1': 'I-COLOR',
 
 
 def _load_results(name):
-    with open(f'{name}.pkl', 'rb') as handle:
+    with open(fr'{config.RNN_PATH}\\{name}.pkl', 'rb') as handle:
         return pickle.load(handle)
 
 
@@ -41,13 +43,19 @@ def _plot_classification_report(data):
     data = data.apply(lambda x: round(x, 2))
     print(Fore.GREEN + tabulate(data, headers='keys', tablefmt='pretty'))
 
+    data.T.precision.plot(kind='bar', title='Precision')
+    plt.show()
+    data.T.recall.plot(kind='bar', title='Recall')
+    plt.show()
+    data.T['f1-score'].plot(kind='bar', title='f1-score')
+    plt.show()
+
 
 def plot_results():
     loss = _load_results(name="loss")
     _plot_loss(loss)
     report = _load_results(name="classification report lstm")
     _plot_classification_report(report)
-
 
 if __name__ == '__main__':
     plot_results()

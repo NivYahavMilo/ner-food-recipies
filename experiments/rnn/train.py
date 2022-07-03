@@ -1,14 +1,13 @@
 import pickle
-
+import config
 import numpy as np
 import torch
 import torch.nn as nn
 
-
-from hyper_parameters import HyperParameters
+from experiments.rnn.hyper_parameters import HyperParameters
 from model.lstm_sequence_tagger import LstmSequenceTagger
-from preprocess import Preprocess
-from utils import _set_device, _prepare_dataset, _get_mask, _plot_loss
+from experiments.rnn.preprocess import Preprocess
+from experiments.rnn.utils import _set_device, _prepare_dataset, _get_mask, _plot_loss
 
 from matplotlib import pyplot as plt
 
@@ -25,7 +24,7 @@ def _set_training_params(data: Preprocess, args: HyperParameters):
     args.TAG_COUNT = len(data.tag2index)
 
 
-def _train():
+def _train(params):
     args = HyperParameters()
     raw_data = Preprocess.flow()
     _set_training_params(raw_data, args)
@@ -108,14 +107,15 @@ def _train():
     print(losses['val_loss'])
 
     # Saving loss of train and validation set
-    # with open('loss.pkl', 'wb') as handle:
-    #     pickle.dump(losses, handle, protocol=pickle.HIGHEST_PROTOCOL)
+    with open(fr'{config.RNN_PATH}\\loss.pkl', 'wb') as handle:
+        pickle.dump(losses, handle, protocol=pickle.HIGHEST_PROTOCOL)
 
     _plot_loss(losses)
 
-    # Saving weights and biases
-    torch.save(model.state_dict(), r'model\\ner_Bilstm.pt')
-    print("model saved to pt")
+    if eval(params["save"]):
+        # Saving weights and biases
+        torch.save(model.state_dict(), r'model\\ner_lstm.pt')
+        print("model saved to pt")
 
     _evaluate(model=model,
               X_test=X_test,
@@ -138,7 +138,7 @@ def _evaluate(model, X_test, X_len_test, y_true, labels):
     print("Accuarcy: %0.3f " % a)
     print(classification_report(y, y_hat))
 
-    with open('classification report lstm.pkl', 'wb') as handle:
+    with open(fr'{config.RNN_PATH}\\classification report lstm.pkl', 'wb') as handle:
         pickle.dump(classification_report(
             y, y_hat, output_dict=True),
             handle, protocol=pickle.HIGHEST_PROTOCOL)
@@ -148,7 +148,3 @@ def _evaluate(model, X_test, X_len_test, y_true, labels):
     cm_display.plot(cmap='plasma')
     plt.title("Confusion Matrix")
     plt.show()
-
-
-if __name__ == '__main__':
-    _train()
