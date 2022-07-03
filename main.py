@@ -1,6 +1,6 @@
 # The main flow should be here
 import argparse
-from experiments.rnn import evaluate, train
+from experiments.rnn import rnn_evaluate, train
 from experiments.bert import ner_bert
 
 def run():
@@ -21,7 +21,7 @@ def pipeline(args):
         train._train(args)
 
     elif args['mode'] == 'evaluate' and args['module'] == 'rnn':
-        evaluate.plot_results()
+        rnn_evaluate.plot_results()
 
     elif args['mode'] == 'train' and args['module'] == 'bert':
         ner_bert._train()
