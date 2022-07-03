@@ -1,4 +1,4 @@
-# NLP Course Final Project Template
+# NLP Course Final Project
 
 ## Repo intro
 
@@ -7,14 +7,14 @@ We provide 2 experiments modules
 
 ### 1. Rnn-based approach:
 
-     Embedding layer (64 sized vector)
-     lstm layer (32 hidden units)
-     fully-connected layer (labels)
+     Embedding layer
+     lstm layer
+     fully-connected layer
   
 ### 2. Transformer-based approach (fine-tune pretrained model):
 
       Embeddings - 'bert-base-uncased'
-      SequenceTagger
+      SequenceTagger - 'ner'
       
 ## Installation | Requirements
 This project was tested on python 3.9 torch &&
