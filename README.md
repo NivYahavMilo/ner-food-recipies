@@ -26,7 +26,7 @@ for installing the dependency packeges simply:
 #### run RNN module:
 for training run: (if you wish to save the model set the --save flag to True)
 
-`python main.py --mode train --module rnn` --save False
+`python main.py --mode train --module rnn --save False`
 
 for evaluation run:
 
