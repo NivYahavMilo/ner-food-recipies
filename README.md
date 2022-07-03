@@ -23,16 +23,18 @@ for installing the dependency packeges simply:
 `pip install -r requirements.txt`
 
 ## Quickstart
-#### run RNN module:
-for training run: (if you wish to save the model set the --save flag to True)
+#### Run RNN module:
+for training run:
 
 `python main.py --mode train --module rnn --save False`
+
+(if you wish to save the model set the --save flag to True)
 
 for evaluation run:
 
 `python main.py --mode evaluate --module rnn`
 
-#### run bert module:
+#### Run BERT module:
 
 for training run:
 
