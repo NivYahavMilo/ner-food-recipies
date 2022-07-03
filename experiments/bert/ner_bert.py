@@ -41,7 +41,7 @@ def _train():
     trainer = ModelTrainer(tagger, corpus)
 
     # run fine-tuning
-    trainer.fine_tune('experiments/bert-ner-recipes',
+    trainer.fine_tune('experiments/bert',
                       learning_rate=5.0e-6,
                       mini_batch_size=4,
                       mini_batch_chunk_size=1)
