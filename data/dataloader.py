@@ -5,7 +5,7 @@ IOB tagging. saves it to csv in 'data' directory
 
 import json
 import pandas as pd
-from data_utils import _read_csv
+from data.data_utils import _read_csv
 
 
 def _data_preprocessing():
