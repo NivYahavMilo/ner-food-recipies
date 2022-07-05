@@ -1,11 +1,11 @@
+import config
+
 from flair.data import Corpus
 from flair.datasets import ColumnCorpus
 from flair.embeddings import TransformerWordEmbeddings
 from flair.models import SequenceTagger
 from flair.trainers import ModelTrainer
-from flair.visual.training_curves import Plotter
 
-import config
 
 
 def _train():

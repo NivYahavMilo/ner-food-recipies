@@ -1,5 +1,9 @@
 """
-Saving original data set to flair format (IOB tagging)
+Saving original data set to IOB format (IOB tagging)
+splitting the data set to 3 parts and saves it as txt file:
+train.txt - training set examples in IOB tagging
+dev.txt - validation set examples in IOB tagging
+test.txt - test set examples in IOB tagging
 """
 
 import pandas as pd

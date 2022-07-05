@@ -1,3 +1,6 @@
+"""
+This script exploring and visualizing the TasteSet dataset
+"""
 import re
 import config
 from dataloader import _read_csv

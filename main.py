@@ -1,7 +1,14 @@
-# The main flow should be here
+"""
+Main script to control the activated module and in which mode
+4 options is available:
+a. training lstm network
+b. evaluating lstm network
+c. fine-tune pre-trained bert architecture
+d. evaluate fine-tuned bert
+"""
 import argparse
 from experiments.rnn import rnn_evaluate, train
-from experiments.bert import ner_bert
+from experiments.bert import ner_bert, bert_evaluate
 
 def run():
 
@@ -25,6 +32,9 @@ def pipeline(args):
 
     elif args['mode'] == 'train' and args['module'] == 'bert':
         ner_bert._train()
+
+    elif args['mode'] == 'evaluate' and args['module'] == 'bert':
+        bert_evaluate.evaluate()
 
 
 
