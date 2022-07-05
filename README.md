@@ -43,8 +43,8 @@ for training run:
 for evaluation run:
 
 `python main.py --mode evaluate --module bert`
-This project contains the pt model in the repository.
-uploaded using GIT LFS
+
+This project contains the pt model in the repository. (uploaded using GIT LFS)
 
 ##### Data Utils
 converting raw data to IOB tagging format:
