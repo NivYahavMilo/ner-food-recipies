@@ -5,7 +5,7 @@ IOB tagging. saves it to csv in 'data' directory
 
 import json
 import pandas as pd
-from data_utils import _read_csv, _split_data_to_train_test
+from data_utils import _read_csv
 
 
 def _data_preprocessing():
@@ -19,7 +19,7 @@ def _data_preprocessing():
         post_df = post_df.append(pd.DataFrame(entities))
         post_df['sample'][jj:jj + len(entities)] = ii + 1
         jj += len(entities)
-        d = form_iob_tagging_format(post_df)
+        d = _form_iob_tagging_format(post_df)
         dd = {}
         dd['entity'] = [tag[0] for ent, tag in d.items()]
         dd['tag'] = [tag[1] for ent, tag in d.items()]
@@ -28,7 +28,7 @@ def _data_preprocessing():
     iob_df.to_csv("IOB tagging.csv")
 
 
-def form_iob_tagging_format(df_section: pd.DataFrame):
+def _form_iob_tagging_format(df_section: pd.DataFrame):
     df_section = df_section.to_dict()
     iob_dict = {}
     jj = 0

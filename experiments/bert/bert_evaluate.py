@@ -1,11 +1,13 @@
 import os
+import config
 
 from flair.data import Corpus
 from flair.datasets import ColumnCorpus
 from flair.models import SequenceTagger
 from flair.visual.training_curves import Plotter
 
-import config
+from matplotlib import pyplot as plt
+
 
 
 def evaluate():
@@ -32,7 +34,4 @@ def evaluate():
     plotter = Plotter()
     plotter.plot_training_curves(os.path.join(config.BERT_PATH,
                                               'loss.tsv'))
-
-
-if __name__ == '__main__':
-    evaluate()
+    plt.show()

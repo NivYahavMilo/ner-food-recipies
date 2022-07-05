@@ -8,13 +8,14 @@ d. evaluate fine-tuned bert
 """
 import argparse
 from experiments.rnn import rnn_evaluate, train
-from experiments.bert import ner_bert, bert_evaluate
+from experiments.bert import ner_bert, bert_evaluate, sequnece_labeling
+from data import dataloader
 
 def run():
 
     parser = argparse.ArgumentParser()
     parser.add_argument("--mode", "-m", default="train", required=True)
-    parser.add_argument("--module", "-b", default="bert", required=True)
+    parser.add_argument("--module", "-b", default="bert", required=False)
     parser.add_argument("--save", "-s", default="False", required=False)
     args = vars(parser.parse_args())
 
@@ -35,6 +36,13 @@ def pipeline(args):
 
     elif args['mode'] == 'evaluate' and args['module'] == 'bert':
         bert_evaluate.evaluate()
+
+    elif args['mode'] == 'IOB':
+        dataloader._data_preprocessing()
+
+    elif args['mode'] == 'generate_corpus':
+        sequnece_labeling.create_corpus()
+
 
 
 
