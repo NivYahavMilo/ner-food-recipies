@@ -43,6 +43,20 @@ for training run:
 for evaluation run:
 
 `python main.py --mode evaluate --module bert`
+This project contains the pt model in the repository.
+uploaded using GIT LFS
+
+##### Data Utils
+converting raw data to IOB tagging format:
+
+`python main.py --mode IOB`
+
+note: the scripts saves it to csv file by the name "IOB tagging.csv"
+
+converting the "IOB tagging.csv" to flair input (train.txt, dev.txt, test.txt):
+
+`python main.py --mode generate_corpus`
+
 
 ## Resources
 * Paperwithcode link: https://paperswithcode.com/paper/tasteset-recipe-dataset-and-food-entities
