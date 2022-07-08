@@ -20,6 +20,14 @@ We provide 2 experiments modules
 This project was tested on python 3.9 & torch 1.12.0 & flair 0.11.3 
 for installing the dependency packeges simply:
 
+it is recmmended to create virtual env inside this repo.
+in cmd:
+`py -m venv env
+cd env
+Scripts\activate`
+
+and then:
+
 `pip install -r requirements.txt`
 
 ## Quickstart
