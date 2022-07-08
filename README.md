@@ -23,9 +23,9 @@ for installing the dependency packeges simply:
 it is recmmended to create virtual env inside this repo.
 
 in cmd:
-`py -m venv env
-cd env
-Scripts\activate`
+`py -m venv env`
+`cd env`
+`Scripts\activate`
 
 and then:
 
